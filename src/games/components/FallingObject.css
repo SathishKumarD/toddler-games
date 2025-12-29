@@ -1,0 +1,51 @@
+.falling-object {
+  position: absolute;
+  z-index: 20;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+}
+
+.object-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.object-letter {
+  font-size: 3rem;
+  font-weight: bold;
+  color: white;
+  text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.3);
+  padding: 0.3rem 1rem;
+  border-radius: 15px;
+  backdrop-filter: blur(5px);
+}
+
+.object-emoji {
+  font-size: 6rem;
+  animation: wobble 0.5s ease-in-out infinite;
+}
+
+@keyframes wobble {
+  0%, 100% {
+    transform: rotate(-3deg);
+  }
+  50% {
+    transform: rotate(3deg);
+  }
+}
+
+@media (max-width: 768px) {
+  .object-letter {
+    font-size: 2rem;
+    padding: 0.2rem 0.8rem;
+  }
+
+  .object-emoji {
+    font-size: 4.5rem;
+  }
+}
+
