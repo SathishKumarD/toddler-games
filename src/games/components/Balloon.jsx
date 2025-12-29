@@ -8,11 +8,12 @@ function Balloon({ balloon, onPop }) {
     y: 50 + (Math.random() - 0.5) * 30 // Start in middle area (35-65%)
   })
   const [velocity, setVelocity] = useState({
-    x: (Math.random() - 0.5) * 2, // Random horizontal speed
-    y: (Math.random() - 0.5) * 2, // Random vertical speed
+    x: (Math.random() - 0.5) * 50, // Random horizontal speed (units per second)
+    y: (Math.random() - 0.5) * 50, // Random vertical speed (units per second)
   })
   const animationFrameRef = useRef()
   const velocityRef = useRef(velocity)
+  const lastTimeRef = useRef(performance.now())
 
   // Keep velocity ref in sync
   useEffect(() => {
@@ -20,11 +21,17 @@ function Balloon({ balloon, onPop }) {
   }, [velocity])
 
   useEffect(() => {
-    const animate = () => {
+    const animate = (currentTime) => {
+      const deltaTime = (currentTime - lastTimeRef.current) / 1000 // Convert to seconds
+      lastTimeRef.current = currentTime
+
+      // Cap delta time to prevent huge jumps (e.g., when tab becomes inactive)
+      const clampedDelta = Math.min(deltaTime, 0.1)
+
       setPosition((prev) => {
         const currentVelocity = velocityRef.current
-        let newX = prev.x + currentVelocity.x
-        let newY = prev.y + currentVelocity.y
+        let newX = prev.x + currentVelocity.x * clampedDelta
+        let newY = prev.y + currentVelocity.y * clampedDelta
         let newVelocity = { ...currentVelocity }
 
         // Bounce off left and right walls (margin to keep balloon fully visible)
@@ -46,11 +53,13 @@ function Balloon({ balloon, onPop }) {
           setVelocity(newVelocity)
         }
 
-        // Random direction changes for floating effect (less frequent)
-        if (Math.random() < 0.01) {
+        // Random direction changes for floating effect (probability per second, not per frame)
+        // At 60fps, 0.01 probability per frame = 0.6 per second
+        // We want similar behavior, so use 0.6 probability per second
+        if (Math.random() < 0.6 * clampedDelta) {
           setVelocity((v) => ({
-            x: v.x + (Math.random() - 0.5) * 0.5,
-            y: v.y + (Math.random() - 0.5) * 0.5,
+            x: v.x + (Math.random() - 0.5) * 10,
+            y: v.y + (Math.random() - 0.5) * 10,
           }))
         }
 
