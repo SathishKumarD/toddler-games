@@ -66,18 +66,21 @@ function AlphabetBalloons() {
       }
       setFallingObjects([newObject])
 
-      // Move to next letter immediately
-      setCurrentLetterIndex((prev) => {
-        const nextIndex = prev + 1
-        if (nextIndex >= ALPHABET.length) {
-          setShowCelebration(true)
-        }
-        return nextIndex
-      })
-      
-      // Clear all balloons and allow new balloons to spawn immediately
-      setBalloons([])
-      setIsTransitioning(false)
+      // Wait for burst animation to complete before moving to next letter
+      setTimeout(() => {
+        // Move to next letter after burst particles have lingered
+        setCurrentLetterIndex((prev) => {
+          const nextIndex = prev + 1
+          if (nextIndex >= ALPHABET.length) {
+            setShowCelebration(true)
+          }
+          return nextIndex
+        })
+        
+        // Clear all balloons and allow new balloons to spawn
+        setBalloons([])
+        setIsTransitioning(false)
+      }, 1500) // Wait 1.5 seconds for burst to be visible
     },
     [currentLetter, letterData]
   )
