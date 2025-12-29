@@ -5,25 +5,31 @@ import './Balloon.css'
 // ============================================
 // BALLOON SPEED CONFIGURATION
 // ============================================
-// Adjust these values to control balloon movement speed
+// Base values that are multiplied by speedMultiplier prop
 const BASE_SPEED = 5          // Initial speed range: -BASE_SPEED to +BASE_SPEED (units per second)
 const MAX_SPEED = 15          // Maximum speed cap (prevents balloons from going too fast)
 const RANDOM_CHANGE = 1.5     // Magnitude of random velocity changes (smaller = gentler)
 const RANDOM_FREQUENCY = 0.3  // How often random changes occur (0-1, lower = less frequent)
 // ============================================
 
-function Balloon({ balloon, onPop }) {
+function Balloon({ balloon, onPop, speedMultiplier = 1 }) {
   const [position, setPosition] = useState({ 
     x: 50 + (Math.random() - 0.5) * 30, // Start in middle area (35-65%)
     y: 50 + (Math.random() - 0.5) * 30 // Start in middle area (35-65%)
   })
   const [velocity, setVelocity] = useState({
-    x: (Math.random() - 0.5) * 2 * BASE_SPEED, // Random horizontal speed (units per second)
-    y: (Math.random() - 0.5) * 2 * BASE_SPEED, // Random vertical speed (units per second)
+    x: (Math.random() - 0.5) * 2 * BASE_SPEED * speedMultiplier, // Random horizontal speed (units per second)
+    y: (Math.random() - 0.5) * 2 * BASE_SPEED * speedMultiplier, // Random vertical speed (units per second)
   })
   const animationFrameRef = useRef()
   const velocityRef = useRef(velocity)
   const lastTimeRef = useRef(performance.now())
+  const speedMultiplierRef = useRef(speedMultiplier)
+
+  // Update speed multiplier ref when it changes
+  useEffect(() => {
+    speedMultiplierRef.current = speedMultiplier
+  }, [speedMultiplier])
 
   // Keep velocity ref in sync
   useEffect(() => {
@@ -59,9 +65,10 @@ function Balloon({ balloon, onPop }) {
         }
 
         // Cap the speed after bounces to prevent exceeding max speed
+        const maxSpeed = MAX_SPEED * speedMultiplierRef.current
         const speed = Math.sqrt(newVelocity.x * newVelocity.x + newVelocity.y * newVelocity.y)
-        if (speed > MAX_SPEED) {
-          const scale = MAX_SPEED / speed
+        if (speed > maxSpeed) {
+          const scale = maxSpeed / speed
           newVelocity.x *= scale
           newVelocity.y *= scale
         }
@@ -75,14 +82,16 @@ function Balloon({ balloon, onPop }) {
         // Reduced frequency and magnitude to prevent speed accumulation
         if (Math.random() < RANDOM_FREQUENCY * clampedDelta) {
           setVelocity((v) => {
-            // Add small random changes
-            let newVelX = v.x + (Math.random() - 0.5) * 2 * RANDOM_CHANGE
-            let newVelY = v.y + (Math.random() - 0.5) * 2 * RANDOM_CHANGE
+            // Add small random changes scaled by speed multiplier
+            const currentMultiplier = speedMultiplierRef.current
+            let newVelX = v.x + (Math.random() - 0.5) * 2 * RANDOM_CHANGE * currentMultiplier
+            let newVelY = v.y + (Math.random() - 0.5) * 2 * RANDOM_CHANGE * currentMultiplier
             
             // Cap the speed to prevent balloons from going too fast
+            const maxSpeed = MAX_SPEED * currentMultiplier
             const speed = Math.sqrt(newVelX * newVelX + newVelY * newVelY)
-            if (speed > MAX_SPEED) {
-              const scale = MAX_SPEED / speed
+            if (speed > maxSpeed) {
+              const scale = maxSpeed / speed
               newVelX *= scale
               newVelY *= scale
             }

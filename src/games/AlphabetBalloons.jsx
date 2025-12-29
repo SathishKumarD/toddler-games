@@ -16,6 +16,7 @@ function AlphabetBalloons() {
   const [fallingObjects, setFallingObjects] = useState([])
   const [showCelebration, setShowCelebration] = useState(false)
   const [isTransitioning, setIsTransitioning] = useState(false)
+  const [speedMultiplier, setSpeedMultiplier] = useState(1) // 0.5 = slow, 1 = normal, 2 = fast
   const balloonIdCounter = useRef(0)
   const objectIdCounter = useRef(0)
 
@@ -105,6 +106,20 @@ function AlphabetBalloons() {
             style={{ width: `${(currentLetterIndex / ALPHABET.length) * 100}%` }}
           />
         </div>
+        <div className="speed-control">
+          <label htmlFor="speed-slider">🐢</label>
+          <input
+            id="speed-slider"
+            type="range"
+            min="0.3"
+            max="5"
+            step="0.1"
+            value={speedMultiplier}
+            onChange={(e) => setSpeedMultiplier(parseFloat(e.target.value))}
+            className="speed-slider"
+          />
+          <label htmlFor="speed-slider">🐇</label>
+        </div>
         <div className="letter-counter">
           {currentLetterIndex}/{ALPHABET.length}
         </div>
@@ -117,6 +132,7 @@ function AlphabetBalloons() {
               key={balloon.id}
               balloon={balloon}
               onPop={handleBalloonPop}
+              speedMultiplier={speedMultiplier}
             />
           ))}
         </AnimatePresence>
