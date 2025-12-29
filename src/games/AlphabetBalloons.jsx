@@ -112,7 +112,7 @@ function AlphabetBalloons() {
             id="speed-slider"
             type="range"
             min="0.3"
-            max="5"
+            max="15"
             step="0.1"
             value={speedMultiplier}
             onChange={(e) => setSpeedMultiplier(parseFloat(e.target.value))}
