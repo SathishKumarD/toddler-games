@@ -2,14 +2,17 @@ import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import './Balloon.css'
 
+// Maximum speed to prevent balloons from going too fast
+const MAX_SPEED = 15 // Units per second
+
 function Balloon({ balloon, onPop }) {
   const [position, setPosition] = useState({ 
     x: 50 + (Math.random() - 0.5) * 30, // Start in middle area (35-65%)
     y: 50 + (Math.random() - 0.5) * 30 // Start in middle area (35-65%)
   })
   const [velocity, setVelocity] = useState({
-    x: (Math.random() - 0.5) * 50, // Random horizontal speed (units per second)
-    y: (Math.random() - 0.5) * 50, // Random vertical speed (units per second)
+    x: (Math.random() - 0.5) * 10, // Random horizontal speed (units per second) -5 to +5
+    y: (Math.random() - 0.5) * 10, // Random vertical speed (units per second) -5 to +5
   })
   const animationFrameRef = useRef()
   const velocityRef = useRef(velocity)
@@ -48,19 +51,37 @@ function Balloon({ balloon, onPop }) {
           newY = newY <= 12 ? 12 : 88
         }
 
+        // Cap the speed after bounces to prevent exceeding max speed
+        const speed = Math.sqrt(newVelocity.x * newVelocity.x + newVelocity.y * newVelocity.y)
+        if (speed > MAX_SPEED) {
+          const scale = MAX_SPEED / speed
+          newVelocity.x *= scale
+          newVelocity.y *= scale
+        }
+
         // Update velocity if it changed
         if (newVelocity.x !== currentVelocity.x || newVelocity.y !== currentVelocity.y) {
           setVelocity(newVelocity)
         }
 
         // Random direction changes for floating effect (probability per second, not per frame)
-        // At 60fps, 0.01 probability per frame = 0.6 per second
-        // We want similar behavior, so use 0.6 probability per second
-        if (Math.random() < 0.6 * clampedDelta) {
-          setVelocity((v) => ({
-            x: v.x + (Math.random() - 0.5) * 10,
-            y: v.y + (Math.random() - 0.5) * 10,
-          }))
+        // Reduced frequency and magnitude to prevent speed accumulation
+        if (Math.random() < 0.3 * clampedDelta) {
+          setVelocity((v) => {
+            // Add small random changes
+            let newVelX = v.x + (Math.random() - 0.5) * 3
+            let newVelY = v.y + (Math.random() - 0.5) * 3
+            
+            // Cap the speed to prevent balloons from going too fast
+            const speed = Math.sqrt(newVelX * newVelX + newVelY * newVelY)
+            if (speed > MAX_SPEED) {
+              const scale = MAX_SPEED / speed
+              newVelX *= scale
+              newVelY *= scale
+            }
+            
+            return { x: newVelX, y: newVelY }
+          })
         }
 
         // Clamp position to bounds (account for balloon size)
