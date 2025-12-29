@@ -2,8 +2,15 @@ import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import './Balloon.css'
 
-// Maximum speed to prevent balloons from going too fast
-const MAX_SPEED = 15 // Units per second
+// ============================================
+// BALLOON SPEED CONFIGURATION
+// ============================================
+// Adjust these values to control balloon movement speed
+const BASE_SPEED = 5          // Initial speed range: -BASE_SPEED to +BASE_SPEED (units per second)
+const MAX_SPEED = 15          // Maximum speed cap (prevents balloons from going too fast)
+const RANDOM_CHANGE = 1.5     // Magnitude of random velocity changes (smaller = gentler)
+const RANDOM_FREQUENCY = 0.3  // How often random changes occur (0-1, lower = less frequent)
+// ============================================
 
 function Balloon({ balloon, onPop }) {
   const [position, setPosition] = useState({ 
@@ -11,8 +18,8 @@ function Balloon({ balloon, onPop }) {
     y: 50 + (Math.random() - 0.5) * 30 // Start in middle area (35-65%)
   })
   const [velocity, setVelocity] = useState({
-    x: (Math.random() - 0.5) * 10, // Random horizontal speed (units per second) -5 to +5
-    y: (Math.random() - 0.5) * 10, // Random vertical speed (units per second) -5 to +5
+    x: (Math.random() - 0.5) * 2 * BASE_SPEED, // Random horizontal speed (units per second)
+    y: (Math.random() - 0.5) * 2 * BASE_SPEED, // Random vertical speed (units per second)
   })
   const animationFrameRef = useRef()
   const velocityRef = useRef(velocity)
@@ -66,11 +73,11 @@ function Balloon({ balloon, onPop }) {
 
         // Random direction changes for floating effect (probability per second, not per frame)
         // Reduced frequency and magnitude to prevent speed accumulation
-        if (Math.random() < 0.3 * clampedDelta) {
+        if (Math.random() < RANDOM_FREQUENCY * clampedDelta) {
           setVelocity((v) => {
             // Add small random changes
-            let newVelX = v.x + (Math.random() - 0.5) * 3
-            let newVelY = v.y + (Math.random() - 0.5) * 3
+            let newVelX = v.x + (Math.random() - 0.5) * 2 * RANDOM_CHANGE
+            let newVelY = v.y + (Math.random() - 0.5) * 2 * RANDOM_CHANGE
             
             // Cap the speed to prevent balloons from going too fast
             const speed = Math.sqrt(newVelX * newVelX + newVelY * newVelY)
